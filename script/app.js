@@ -8,15 +8,7 @@ export function initializeAsciiCamera() {
     const asciiContainer = document.getElementById("ascii");
     let capturing = false;
 
-    initWebRtc({
-        onOpen: () => {console.log('Data channel opened!');
-                        sendMessage('Hello WebRTC!');
-                      },
-        onMessage: (msg) => console.log('Received message:', msg),
-        onError: (err) => console.error('Error:', err),
-        onClose: () => console.log('Data channel closed'),
-        onConnectionStateChange: (state) => console.log('ICE Connection State:', state)
-    });
+ 
     
     // Send a message after the data channel opens
     
@@ -33,7 +25,8 @@ export function initializeAsciiCamera() {
             asciiFromCanvas(canvas, {
                 // contrast: 128, // You can customize contrast here
                 callback: function (asciiString) {
-                    asciiContainer.innerHTML = asciiString;
+                    sendMessage(asciiString);
+                    //asciiContainer.innerHTML = asciiString;
                 }
             });
         },
@@ -69,6 +62,20 @@ export function initializeAsciiCamera() {
         }
     });
 }
+const asciiContainer = document.getElementById("ascii");
+initWebRtc({
+    onOpen: () => {console.log('Data channel opened!');
+                    //sendMessage('Hello WebRTC!');
+                    initializeAsciiCamera();
+                  },
+    onMessage: (msg) => { 
+    asciiContainer.innerHTML = msg;
+
+    },
+    onError: (err) => console.error('Error:', err),
+    onClose: () => console.log('Data channel closed'),
+    onConnectionStateChange: (state) => console.log('ICE Connection State:', state)
+});
 
 // Automatically initialize when this module is imported
 initializeAsciiCamera();
