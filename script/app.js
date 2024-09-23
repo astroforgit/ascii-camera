@@ -1,10 +1,26 @@
 import { init as initCamera, start as startCamera, pause as pauseCamera } from './camera.js';
 import { asciiFromCanvas } from './ascii.js';
+import { init  as initWebRtc, sendMessage, closeConnection } from './webrtc.js';
 
 // Initialize the camera and ASCII rendering
+ 
 export function initializeAsciiCamera() {
     const asciiContainer = document.getElementById("ascii");
     let capturing = false;
+
+    initWebRtc({
+        onOpen: () => {console.log('Data channel opened!');
+                        sendMessage('Hello WebRTC!');
+                      },
+        onMessage: (msg) => console.log('Received message:', msg),
+        onError: (err) => console.error('Error:', err),
+        onClose: () => console.log('Data channel closed'),
+        onConnectionStateChange: (state) => console.log('ICE Connection State:', state)
+    });
+    
+    // Send a message after the data channel opens
+    
+
 
     initCamera({
         width: 160,
