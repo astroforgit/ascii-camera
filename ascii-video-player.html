@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII Video Player</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #000;
+            color: #00ff00;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+            margin-bottom: 30px;
+        }
+
+        .file-input-section {
+            background: #111;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .file-input {
+            margin: 10px;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            border-radius: 5px;
+        }
+
+        .load-button {
+            background: #003300;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .load-button:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 15px #00ff00;
+        }
+
+        .controls {
+            background: #111;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .control-button {
+            background: #003300;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+
+        .control-button:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .control-button:disabled {
+            background: #333;
+            border-color: #666;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #00aa00);
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        .info-panel {
+            background: #111;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .info-item {
+            margin: 5px 0;
+        }
+
+        .ascii-display {
+            background: #000;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 8px;
+            line-height: 1;
+            white-space: pre;
+            overflow: auto;
+            min-height: 400px;
+            text-align: center;
+            display: none;
+            box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.1);
+        }
+
+        .loading {
+            text-align: center;
+            color: #00ff00;
+            font-size: 18px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .error {
+            color: #ff0000;
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            border: 2px solid #ff0000;
+            border-radius: 5px;
+            background: #330000;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .ascii-display {
+                font-size: 6px;
+                padding: 10px;
+            }
+            
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 ASCII Video Player</h1>
+        
+        <div class="file-input-section">
+            <h3>Load ASCII Video File</h3>
+            <input type="file" id="fileInput" class="file-input" accept=".txt" />
+            <br>
+            <button id="loadButton" class="load-button">Load Video</button>
+        </div>
+
+        <div id="loading" class="loading">
+            Loading and decompressing video...
+        </div>
+
+        <div id="error" class="error"></div>
+
+        <div id="infoPanel" class="info-panel">
+            <h3>Video Information</h3>
+            <div id="videoInfo"></div>
+        </div>
+
+        <div id="controls" class="controls">
+            <button id="playButton" class="control-button">▶ Play</button>
+            <button id="pauseButton" class="control-button">⏸ Pause</button>
+            <button id="stopButton" class="control-button">⏹ Stop</button>
+            <button id="prevButton" class="control-button">⏮ Prev Frame</button>
+            <button id="nextButton" class="control-button">⏭ Next Frame</button>
+            <br>
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <div>
+                Frame: <span id="currentFrame">0</span> / <span id="totalFrames">0</span>
+                | FPS: <span id="fpsDisplay">0</span>
+                | Speed: <select id="speedSelect">
+                    <option value="0.25">0.25x</option>
+                    <option value="0.5">0.5x</option>
+                    <option value="1" selected>1x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2">2x</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="asciiDisplay" class="ascii-display"></div>
+    </div>
+
+    <script type="module">
+        import LZString from 'https://cdn.skypack.dev/lz-string';
+
+        class AsciiVideoPlayer {
+            constructor() {
+                this.videoData = null;
+                this.currentFrame = 0;
+                this.isPlaying = false;
+                this.playInterval = null;
+                this.playbackSpeed = 1;
+                
+                this.initializeElements();
+                this.bindEvents();
+            }
+
+            initializeElements() {
+                this.fileInput = document.getElementById('fileInput');
+                this.loadButton = document.getElementById('loadButton');
+                this.loading = document.getElementById('loading');
+                this.error = document.getElementById('error');
+                this.infoPanel = document.getElementById('infoPanel');
+                this.videoInfo = document.getElementById('videoInfo');
+                this.controls = document.getElementById('controls');
+                this.asciiDisplay = document.getElementById('asciiDisplay');
+                
+                this.playButton = document.getElementById('playButton');
+                this.pauseButton = document.getElementById('pauseButton');
+                this.stopButton = document.getElementById('stopButton');
+                this.prevButton = document.getElementById('prevButton');
+                this.nextButton = document.getElementById('nextButton');
+                this.progressFill = document.getElementById('progressFill');
+                this.currentFrameSpan = document.getElementById('currentFrame');
+                this.totalFramesSpan = document.getElementById('totalFrames');
+                this.fpsDisplay = document.getElementById('fpsDisplay');
+                this.speedSelect = document.getElementById('speedSelect');
+            }
+
+            bindEvents() {
+                this.loadButton.addEventListener('click', () => this.loadVideo());
+                this.playButton.addEventListener('click', () => this.play());
+                this.pauseButton.addEventListener('click', () => this.pause());
+                this.stopButton.addEventListener('click', () => this.stop());
+                this.prevButton.addEventListener('click', () => this.previousFrame());
+                this.nextButton.addEventListener('click', () => this.nextFrame());
+                this.speedSelect.addEventListener('change', (e) => {
+                    this.playbackSpeed = parseFloat(e.target.value);
+                    if (this.isPlaying) {
+                        this.pause();
+                        this.play();
+                    }
+                });
+            }
+
+            showError(message) {
+                this.error.textContent = message;
+                this.error.style.display = 'block';
+                this.hideLoading();
+            }
+
+            hideError() {
+                this.error.style.display = 'none';
+            }
+
+            showLoading() {
+                this.loading.style.display = 'block';
+                this.hideError();
+            }
+
+            hideLoading() {
+                this.loading.style.display = 'none';
+            }
+
+            async loadVideo() {
+                const file = this.fileInput.files[0];
+                if (!file) {
+                    this.showError('Please select a file first');
+                    return;
+                }
+
+                this.showLoading();
+
+                try {
+                    const compressedData = await this.readFile(file);
+                    console.log('Decompressing data...');
+                    
+                    const decompressedData = LZString.decompressFromEncodedURIComponent(compressedData);
+                    if (!decompressedData) {
+                        throw new Error('Failed to decompress data. File may be corrupted.');
+                    }
+
+                    this.videoData = JSON.parse(decompressedData);
+                    this.validateVideoData();
+                    
+                    this.hideLoading();
+                    this.displayVideoInfo();
+                    this.showControls();
+                    this.currentFrame = 0;
+                    this.displayFrame();
+                    
+                } catch (error) {
+                    console.error('Error loading video:', error);
+                    this.showError(`Error loading video: ${error.message}`);
+                }
+            }
+
+            readFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = () => reject(new Error('Failed to read file'));
+                    reader.readAsText(file);
+                });
+            }
+
+            validateVideoData() {
+                if (!this.videoData || !this.videoData.frames || !Array.isArray(this.videoData.frames)) {
+                    throw new Error('Invalid video data format');
+                }
+                if (this.videoData.frames.length === 0) {
+                    throw new Error('Video contains no frames');
+                }
+            }
+
+            displayVideoInfo() {
+                const info = this.videoData;
+                this.videoInfo.innerHTML = `
+                    <div class="info-item"><strong>Original Video:</strong> ${info.metadata?.originalVideo || 'Unknown'}</div>
+                    <div class="info-item"><strong>Dimensions:</strong> ${info.width} x ${info.height}</div>
+                    <div class="info-item"><strong>Total Frames:</strong> ${info.totalFrames}</div>
+                    <div class="info-item"><strong>FPS:</strong> ${info.fps}</div>
+                    <div class="info-item"><strong>Duration:</strong> ${(info.totalFrames / info.fps).toFixed(2)} seconds</div>
+                    <div class="info-item"><strong>Processed:</strong> ${info.metadata?.processedAt ? new Date(info.metadata.processedAt).toLocaleString() : 'Unknown'}</div>
+                `;
+                this.infoPanel.style.display = 'block';
+            }
+
+            showControls() {
+                this.controls.style.display = 'block';
+                this.asciiDisplay.style.display = 'block';
+                this.totalFramesSpan.textContent = this.videoData.totalFrames;
+                this.fpsDisplay.textContent = this.videoData.fps;
+            }
+
+            displayFrame() {
+                if (!this.videoData || this.currentFrame >= this.videoData.frames.length) {
+                    return;
+                }
+
+                this.asciiDisplay.textContent = this.videoData.frames[this.currentFrame];
+                this.currentFrameSpan.textContent = this.currentFrame + 1;
+                
+                const progress = ((this.currentFrame + 1) / this.videoData.totalFrames) * 100;
+                this.progressFill.style.width = `${progress}%`;
+            }
+
+            play() {
+                if (!this.videoData || this.isPlaying) return;
+                
+                this.isPlaying = true;
+                this.playButton.disabled = true;
+                this.pauseButton.disabled = false;
+                
+                const frameDelay = (1000 / this.videoData.fps) / this.playbackSpeed;
+                
+                this.playInterval = setInterval(() => {
+                    this.currentFrame++;
+                    if (this.currentFrame >= this.videoData.frames.length) {
+                        this.stop();
+                        return;
+                    }
+                    this.displayFrame();
+                }, frameDelay);
+            }
+
+            pause() {
+                if (!this.isPlaying) return;
+                
+                this.isPlaying = false;
+                this.playButton.disabled = false;
+                this.pauseButton.disabled = true;
+                
+                if (this.playInterval) {
+                    clearInterval(this.playInterval);
+                    this.playInterval = null;
+                }
+            }
+
+            stop() {
+                this.pause();
+                this.currentFrame = 0;
+                this.displayFrame();
+            }
+
+            previousFrame() {
+                if (!this.videoData) return;
+                
+                this.currentFrame = Math.max(0, this.currentFrame - 1);
+                this.displayFrame();
+            }
+
+            nextFrame() {
+                if (!this.videoData) return;
+                
+                this.currentFrame = Math.min(this.videoData.frames.length - 1, this.currentFrame + 1);
+                this.displayFrame();
+            }
+        }
+
+        // Initialize the player when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new AsciiVideoPlayer();
+        });
+    </script>
+</body>
+</html>

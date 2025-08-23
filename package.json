@@ -1,16 +1,36 @@
 {
-    "name": "vite-starter",
-    "private": true,
-    "version": "0.0.0",
-    "type": "module",
-    "scripts": {
-      "dev": "vite",
-      "build": "vite build",
-      "preview": "vite preview"
-    },
-    "devDependencies": {
-      "vite": "^5.4.6"
-    }
-  }
-
-  
+  "name": "ascii-camera-webrtc",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "ASCII Camera with WebRTC real-time communication and compression",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "node signaling-server.js",
+    "client": "concurrently \"npm run server\" \"npm run dev\" --names \"SIGNALING,CLIENT\" --prefix-colors \"blue,green\"",
+    "start": "npm run client",
+    "video-to-ascii": "node scripts/video-to-ascii.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "vite": "^5.4.6"
+  },
+  "dependencies": {
+    "lz-string": "^1.5.0",
+    "ws": "^8.14.2",
+    "ffmpeg-static": "^5.2.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "sharp": "^0.33.5"
+  },
+  "keywords": [
+    "webrtc",
+    "ascii",
+    "camera",
+    "compression",
+    "real-time"
+  ],
+  "author": "ASCII Camera WebRTC",
+  "license": "MIT"
+}

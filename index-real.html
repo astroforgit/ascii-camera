@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+	<title>ASCII Camera - Real World WebRTC</title>
+	<meta charset="utf-8" />
+ 	<link rel="stylesheet" href="css/main.css"/>
+	<link href="/favicon.png" rel="icon" type="image/png" />
+	<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+	<h1 id="info">Please allow this page to access your camera.</h1>
+
+	<div id="connection-status">
+		<div id="status-indicator" class="disconnected"></div>
+		<span id="status-text">Connecting to signaling server...</span>
+		<span id="room-display" style="margin-left: 10px; font-weight: bold; color: #0090ff;"></span>
+		<button id="leave-room" style="margin-left: 15px; padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; display: none;">Leave Room</button>
+	</div>
+
+	<div id="lobby-container">
+		<div id="lobby-header">
+			<h2>🎥 ASCII Camera Rooms</h2>
+			<p>Join an existing room or create a new one to start sharing ASCII video!</p>
+		</div>
+
+		<div id="lobby-content">
+			<!-- Create New Room Section -->
+			<div id="create-room-section" class="lobby-section">
+				<h3>🆕 Create New Room</h3>
+				<div class="create-room-form">
+					<input type="text" id="new-room-name" placeholder="Enter room name (optional)" maxlength="30" />
+					<button id="create-room-btn" class="primary-btn">Create Room</button>
+				</div>
+				<p class="help-text">Leave empty for a random room name</p>
+			</div>
+
+			<!-- Join Existing Room Section -->
+			<div id="join-room-section" class="lobby-section">
+				<h3>🚪 Join Existing Room</h3>
+				<div id="rooms-list-container">
+					<div id="rooms-loading" class="loading-state">
+						<span class="loading-spinner">⟳</span>
+						Loading rooms...
+					</div>
+					<div id="rooms-list" style="display: none;">
+						<!-- Rooms will be populated here -->
+					</div>
+					<div id="no-rooms" style="display: none;" class="empty-state">
+						<p>🏠 No active rooms found</p>
+						<p>Be the first to create one!</p>
+					</div>
+				</div>
+				<button id="refresh-rooms" class="secondary-btn">🔄 Refresh</button>
+			</div>
+
+			<!-- Quick Join Section -->
+			<div id="quick-join-section" class="lobby-section">
+				<h3>🔗 Quick Join</h3>
+				<div class="quick-join-form">
+					<input type="text" id="room-code-input" placeholder="Enter room code" />
+					<button id="quick-join-btn" class="secondary-btn">Join</button>
+				</div>
+				<p class="help-text">Have a room code? Enter it here</p>
+			</div>
+		</div>
+	</div>
+
+	<div id="notSupported">
+		<h1>Your browser does not support the Camera API.</h1>
+		<img src="images/screenshot.png" align="center" />
+	</div>
+	
+	<div id="main-container" style="display: none;">
+		<div id="ascii-section">
+			<h2>Your ASCII Camera</h2>
+			<pre id="ascii"></pre>
+			<div id="controls">
+				<button id="button">start</button>
+				<button id="test-compression">Test Compression</button>
+			</div>
+		</div>
+		
+		<div id="remote-ascii-section">
+			<h2>Remote ASCII Camera</h2>
+			<pre id="remote-ascii">Waiting for remote peer...</pre>
+		</div>
+		
+		<div id="chat-section">
+			<h2>WebRTC Chat</h2>
+			<div id="chat-messages"></div>
+			<div id="chat-input-container">
+				<input type="text" id="chat-input" placeholder="Type your message..." />
+				<button id="send-button">Send</button>
+			</div>
+		</div>
+	</div>
+
+	<a href="https://github.com/idevelop/ascii-camera" id="fork" target="_blank">View on GitHub</a>
+	<a href="http://idevelop.github.com/" id="idevelop" target="_blank">Made by idevelop</a>
+
+	<script type="module" src="./script/app-real.js"></script>
+</body>
+</html>
